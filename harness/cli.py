@@ -62,7 +62,8 @@ def test_agent(args: argparse.Namespace) -> None:
         result = agent.run(test_input)
         duration = time.monotonic() - start_time
 
-        print("✅ Agent run successful"        print(f"   Duration: {duration:.2f}s")
+        print("✅ Agent run successful")
+        print(f"   Duration: {duration:.2f}s")
         print(f"   Result: {result}")
         print(f"   Trace ID: {result.trace_id}")
 
@@ -115,10 +116,12 @@ async def benchmark_agent(args: argparse.Namespace) -> None:
     total_time = time.time() - start_time
     rps = args.iterations / total_time
 
-    print("📊 Benchmark Results:"    print(f"   Total runs: {args.iterations}")
+    print("📊 Benchmark Results:")
+    print(f"   Total runs: {args.iterations}")
     print(f"   Successes: {successes}")
     print(f"   Failures: {failures}")
-    print(".2f"    print(".2f"
+    print(f"   Total time: {total_time:.2f}s")
+    print(f"   RPS: {rps:.2f}")
 def start_ui(args: argparse.Namespace) -> None:
     """Start the web UI server."""
     from harness.ui import main as ui_main
@@ -145,14 +148,10 @@ def main() -> None:
     ui_parser = subparsers.add_parser("ui", help="Start the web UI server")
     ui_parser.set_defaults(func=start_ui)
 
-    if args.command == "test-agent":
-        test_agent(args)
-    elif args.command == "benchmark":
-        asyncio.run(benchmark_agent(args))
-    elif args.command == "validate-schema":
-        validate_schema(args)
-    elif args.command == "ui":
-        start_ui(args)
+    args = parser.parse_args()
+
+    if hasattr(args, 'func'):
+        args.func(args)
     else:
         parser.print_help()
 

@@ -42,6 +42,9 @@ test = [
 [tool.setuptools.packages.find]
 include = ["harness*", "telemetry*"]
 
+[project.scripts]
+harness-cli = "harness.cli:main"
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
