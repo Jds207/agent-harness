@@ -119,24 +119,10 @@ async def benchmark_agent(args: argparse.Namespace) -> None:
     print(f"   Successes: {successes}")
     print(f"   Failures: {failures}")
     print(".2f"    print(".2f"
-def validate_schema(args: argparse.Namespace) -> None:
-    """Validate a JSON schema file."""
-    try:
-        with open(args.schema) as f:
-            schema = json.load(f)
-
-        # Basic validation - check required fields
-        required_fields = ["type", "properties"]
-        if not all(field in schema for field in required_fields):
-            print(f"❌ Invalid schema: missing {required_fields}")
-            sys.exit(1)
-
-        print("✅ Schema validation passed"        print(f"   Type: {schema.get('type')}")
-        print(f"   Properties: {list(schema.get('properties', {}).keys())}")
-
-    except Exception as e:
-        print(f"❌ Schema validation failed: {e}")
-        sys.exit(1)
+def start_ui(args: argparse.Namespace) -> None:
+    """Start the web UI server."""
+    from harness.ui import main as ui_main
+    ui_main()
 
 
 def main() -> None:
@@ -155,11 +141,9 @@ def main() -> None:
     bench_parser.add_argument("--config", required=True, help="Path to agent config JSON")
     bench_parser.add_argument("--iterations", type=int, default=100, help="Number of iterations")
 
-    # Validate schema command
-    schema_parser = subparsers.add_parser("validate-schema", help="Validate JSON schema")
-    schema_parser.add_argument("--schema", required=True, help="Path to schema JSON file")
-
-    args = parser.parse_args()
+    # Start UI command
+    ui_parser = subparsers.add_parser("ui", help="Start the web UI server")
+    ui_parser.set_defaults(func=start_ui)
 
     if args.command == "test-agent":
         test_agent(args)
@@ -167,6 +151,8 @@ def main() -> None:
         asyncio.run(benchmark_agent(args))
     elif args.command == "validate-schema":
         validate_schema(args)
+    elif args.command == "ui":
+        start_ui(args)
     else:
         parser.print_help()
 
