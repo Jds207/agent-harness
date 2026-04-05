@@ -9,11 +9,15 @@ This document outlines the planned evolution of the `reliable-agent-harness` fro
 - Structured logging + FailureLogger
 - In-memory LessonsLearnedStore
 
-## v0.2.0 — Multi-Step Workflows (In Progress)
-- BaseWorkflow + LangGraph integration
-- WorkflowStep with pre/post validation
-- Cross-step invariants
-- State persistence
+## v0.2.0 — Enhanced Production Features (✅ Released 2026-04-05)
+- **Async Support**: AsyncBaseAgent and AsyncAgentPool for concurrent execution
+- **Enhanced Metrics**: Token usage, cost tracking, model parameters, active requests
+- **CLI Tools**: Testing, benchmarking, and validation commands
+- **Health Checks**: HTTP health endpoints with database/API monitoring
+- **Alerting System**: Email and Slack notifications for metric thresholds
+- **Multi-Step Workflows**: BaseWorkflow + LangGraph integration (planned)
+- **WorkflowStep**: Pre/post validation with cross-step invariants (planned)
+- **State Persistence**: Workflow state management (planned)
 
 ## v0.3.0 — Self-Improving System
 - Persistent LessonsLearnedStore (SQLite/vector)
