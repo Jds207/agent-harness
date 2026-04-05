@@ -1,0 +1,30 @@
+# Tempo configuration – local single-binary mode
+#
+# Receives traces from the OTel Collector and stores them on local disk.
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:9095"
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/traces
+    wal:
+      path: /var/tempo/wal
+
+compactor:
+  compaction:
+    block_retention: 48h
+
+metrics_generator:
+  storage:
+    path: /var/tempo/metrics

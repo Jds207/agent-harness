@@ -1,0 +1,16 @@
+# Grafana dashboard provisioning
+#
+# Points Grafana at the dashboards directory so JSON dashboards
+# are loaded automatically on startup.
+
+apiVersion: 1
+
+providers:
+  - name: "agent-harness"
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
