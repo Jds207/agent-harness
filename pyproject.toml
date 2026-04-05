@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reliable-agent-harness"
+version = "0.1.0"
+description = "A reusable Python package that makes every AI agent reliable, observable, and correct by construction."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Agent Harness Team"},
+]
+dependencies = [
+    "pydantic>=2.0,<3.0",
+    "pydantic-settings>=2.0,<3.0",
+    "structlog>=23.0",
+    "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.5",
+    "ruff>=0.1",
+]
+test = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "coverage>=7.3",
+]
+
+[tool.setuptools.packages.find]
+include = ["harness*"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
