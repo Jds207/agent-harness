@@ -11,7 +11,7 @@ distributor:
     otlp:
       protocols:
         grpc:
-          endpoint: "0.0.0.0:9095"
+          endpoint: "0.0.0.0:4320"
 
 storage:
   trace:
