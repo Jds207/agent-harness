@@ -1,18 +1,18 @@
-# reliable-agent-harness
+# agent-harness
 
 A reusable, versioned Python package that turns any AI agent into a reliable, production-grade system. Instead of each agent re-implementing retry loops, validation, logging, and error handling, they inherit battle-tested infrastructure from this harness and focus purely on domain logic.
 
 ## Installation
 
 ```bash
-pip install git+https://github.com/your-org/reliable-agent-harness.git@v0.1.0
+pip install git+https://github.com/Jds207/agent-harness.git@v0.1.0
 ```
 
 Or add to your `pyproject.toml`:
 
 ```toml
 dependencies = [
-    "reliable-agent-harness @ git+https://github.com/your-org/reliable-agent-harness.git@v0.1.0",
+    "agent-harness @ git+https://github.com/Jds207/agent-harness.git@v0.1.0",
 ]
 ```
 
@@ -65,8 +65,8 @@ print(agent.get_trace())  # Full execution trace
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/reliable-agent-harness.git
-cd reliable-agent-harness
+git clone https://github.com/Jds207/agent-harness.git
+cd agent-harness
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev,test]"
 

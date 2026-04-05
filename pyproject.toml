@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "reliable-agent-harness"
+name = "agent-harness"
 version = "0.1.0"
-description = "A reusable Python package that makes every AI agent reliable, observable, and correct by construction."
+description = "Reusable reliability layer for production AI agents."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
