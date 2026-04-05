@@ -13,8 +13,10 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(agent_runs_total[1m])) by (agent, status)",
-          "legendFormat": "{{agent}} – {{status}}"
+          "legendFormat": "{{agent}} – {{status}}",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -31,16 +33,22 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "histogram_quantile(0.50, sum(rate(agent_run_duration_seconds_bucket[5m])) by (le, agent))",
-          "legendFormat": "{{agent}} p50"
+          "legendFormat": "{{agent}} p50",
+          "refId": "A"
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "histogram_quantile(0.95, sum(rate(agent_run_duration_seconds_bucket[5m])) by (le, agent))",
-          "legendFormat": "{{agent}} p95"
+          "legendFormat": "{{agent}} p95",
+          "refId": "B"
         },
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "histogram_quantile(0.99, sum(rate(agent_run_duration_seconds_bucket[5m])) by (le, agent))",
-          "legendFormat": "{{agent}} p99"
+          "legendFormat": "{{agent}} p99",
+          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -57,8 +65,10 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(agent_validation_total[1m])) by (agent, valid)",
-          "legendFormat": "{{agent}} valid={{valid}}"
+          "legendFormat": "{{agent}} valid={{valid}}",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -75,8 +85,10 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "sum(rate(agent_runs_total{status=\"success\"}[5m])) / sum(rate(agent_runs_total[5m])) * 100",
-          "legendFormat": "success %"
+          "legendFormat": "success %",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
