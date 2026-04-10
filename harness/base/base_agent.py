@@ -70,7 +70,7 @@ class BaseAgent(ABC):
             Exception: If processing fails after all retries
         """
         # Validate input schema
-        input_obj = AgentInput(data=input_data)
+        input_obj = AgentInput(**input_data)
         self.validator.validate_input(input_obj)
 
         try:
@@ -109,6 +109,7 @@ class BaseAgent(ABC):
             Processing result
         """
         @self.retry_handler.retry
+        @self.circuit_breaker.call
         def _inner_process() -> Dict[str, Any]:
             # Validate pre-processing state
             self.step_validator.validate_step("pre_process")
@@ -122,22 +123,6 @@ class BaseAgent(ABC):
             return result
 
         return _inner_process()
-
-    @abstractmethod
-    def _execute(self, input_obj: AgentInput) -> Dict[str, Any]:
-        """Execute the agent-specific logic.
-
-        Subclasses must implement this method to provide their domain logic.
-
-        Args:
-            input_obj: Validated input object
-
-        Returns:
-            Result dictionary that will be validated as AgentOutput
-        """
-        pass
-    # Abstract
-    # ------------------------------------------------------------------
 
     @abstractmethod
     def _execute(self, input_obj: AgentInput) -> Dict[str, Any]:

@@ -7,100 +7,46 @@ Why this exists:
     record so debugging never starts from scratch.
 """
 
-from __future__ import annotations
-
-from datetime import datetime, timezone
 from typing import Any
-
-from pydantic import BaseModel, Field
-
-from harness.observability.logging import get_logger
-
-logger = get_logger()
-
-
-class FailureRecord(BaseModel):
-    """A structured record of a single failure event.
-
-    Attributes:
-        timestamp: When the failure occurred (UTC).
-        error_type: The exception class name.
-        error_message: The exception message.
-        trace_id: The trace id of the run that failed.
-        step_name: Which pipeline step failed.
-        input_data: The input that caused the failure.
-        config_snapshot: Agent configuration at failure time.
-        partial_output: Any output produced before the failure.
-    """
-
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    error_type: str
-    error_message: str
-    trace_id: str = ""
-    step_name: str = ""
-    input_data: dict[str, Any] = {}
-    config_snapshot: dict[str, Any] = {}
-    partial_output: dict[str, Any] = {}
+from datetime import datetime
+import json
 
 
 class FailureLogger:
-    """Accumulates structured failure records in memory.
+    """Logger for capturing and classifying failures.
 
-    Why this exists:
-        Provides a queryable log of everything that went wrong so that
-        feedback loops and dashboards can surface patterns.  In v0.1 this
-        is in-memory; future versions will persist to a database.
+    Why this design: FailureLogger treats failures as first-class data, capturing detailed information about errors to enable analysis and improvement of agent reliability. It stores failures in a structured format for later analysis and pattern detection.
+
+    Args:
+        log_file: Path to the file where failures will be logged
     """
 
-    def __init__(self) -> None:
-        self._records: list[FailureRecord] = []
-
-    def log(
-        self,
-        *,
-        error: Exception,
-        trace_id: str = "",
-        step_name: str = "",
-        input_data: dict[str, Any] | None = None,
-        config_snapshot: dict[str, Any] | None = None,
-        partial_output: dict[str, Any] | None = None,
-    ) -> FailureRecord:
-        """Record a failure with full context.
+    def __init__(self, log_file: str = "failures.log") -> None:
+        """Initialize failure logger.
 
         Args:
-            error: The exception that was raised.
-            trace_id: Trace identifier for the current run.
-            step_name: Name of the step that failed.
-            input_data: The input payload that triggered the failure.
-            config_snapshot: Agent configuration at the time of failure.
-            partial_output: Any output produced before the failure.
-
-        Returns:
-            The created ``FailureRecord``.
+            log_file: File path for storing failure records
         """
-        record = FailureRecord(
-            error_type=type(error).__name__,
-            error_message=str(error),
-            trace_id=trace_id,
-            step_name=step_name,
-            input_data=input_data or {},
-            config_snapshot=config_snapshot or {},
-            partial_output=partial_output or {},
-        )
-        self._records.append(record)
-        logger.error(
-            "failure_logged",
-            error_type=record.error_type,
-            trace_id=trace_id,
-            step_name=step_name,
-        )
-        return record
+        self.log_file = log_file
 
-    @property
-    def records(self) -> list[FailureRecord]:
-        """All failure records logged so far."""
-        return list(self._records)
+    def log_failure(self, error: Exception, context: Any) -> None:
+        """Log a failure with full context.
 
-    def clear(self) -> None:
-        """Remove all stored records."""
-        self._records.clear()
+        Args:
+            error: The exception that occurred
+            context: Context information about the failure (e.g., input data)
+        """
+        failure_record = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "error_module": error.__class__.__module__,
+            "context": str(context)
+        }
+
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(failure_record, ensure_ascii=False) + "\n")
+        except Exception as log_error:
+            # If logging fails, print to stderr as fallback
+            print(f"Failed to log failure: {log_error}", file=__import__("sys").stderr)

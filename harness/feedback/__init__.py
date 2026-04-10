@@ -6,7 +6,9 @@ Why this exists:
     future developers) can learn from past mistakes.
 """
 
-from harness.feedback.failure_logger import FailureLogger
-from harness.feedback.lessons import LessonsLearnedStore
+from .failure_logger import FailureLogger
+from .lessons_store import LessonsLearnedStore
+
+__all__ = ["FailureLogger", "LessonsLearnedStore"]
 
 __all__ = ["FailureLogger", "LessonsLearnedStore"]

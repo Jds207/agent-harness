@@ -6,7 +6,9 @@ Why this exists:
     feedback) can operate generically over any agent implementation.
 """
 
-from harness.base.agent import BaseAgent
-from harness.base.config import AgentConfig
+from .base_agent import BaseAgent
+from .config import AgentConfig
+
+__all__ = ["BaseAgent", "AgentConfig"]
 
 __all__ = ["BaseAgent", "AgentConfig"]

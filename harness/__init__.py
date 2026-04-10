@@ -1,10 +1,8 @@
-"""reliable-agent-harness – production-grade infrastructure for AI agents.
+"""Reliable Agent Harness - A production-grade framework for building reliable AI agents.
 
-Why this exists:
-    Every agent in the portfolio needs reliability, observability, and
-    correctness guarantees.  This package provides those as reusable,
-    composable building blocks so individual agents can focus on domain
-    logic rather than re-implementing retry loops, logging, and validation.
+This package provides a comprehensive framework that turns any AI agent into a
+reliable, production-grade system through correctness by construction, schema
+validation, reliability patterns, observability, and feedback loops.
 """
 
 __version__ = "0.1.0"

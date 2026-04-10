@@ -7,68 +7,56 @@ Why this exists:
     persistently failing.  This class composes all of that.
 """
 
-from __future__ import annotations
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from typing import Callable, Any
 
-import functools
-from collections.abc import Callable
-from typing import Any, TypeVar
+from pydantic import BaseModel, Field
 
-from tenacity import (
-    RetryError,
-    retry,
-    stop_after_attempt,
-    wait_exponential_jitter,
-    wait_none,
-)
 
-from harness.observability.logging import get_logger
-from harness.utils.exceptions import RetryExhaustedError
+class RetryConfig(BaseModel):
+    """Configuration for retry behavior.
 
-F = TypeVar("F", bound=Callable[..., Any])
-
-logger = get_logger()
+    Why this design: RetryConfig centralizes retry parameters in a validated structure,
+    ensuring consistent and safe retry behavior across the system.
+    """
+    max_attempts: int = Field(default=3, description="Maximum number of retry attempts")
+    wait_multiplier: float = Field(default=1.0, description="Base multiplier for exponential backoff")
+    wait_max: float = Field(default=60.0, description="Maximum wait time between retries")
 
 
 class RetryWithFallback:
-    """Wraps a callable with retry logic and an optional fallback.
+    """Retry mechanism with fallback strategies.
 
-    Why this exists:
-        Agents often call external services that can transiently fail.
-        This class retries with exponential back-off, then – if all
-        attempts are exhausted – invokes an optional fallback callable
-        before raising ``RetryExhaustedError``.
+    Why this design: RetryWithFallback uses tenacity for robust retry logic with exponential backoff,
+    ensuring transient failures don't break agent operations while providing configurable fallback behavior.
 
     Args:
-        max_retries: Maximum number of retry attempts.
-        base_delay: Initial delay in seconds for exponential back-off.
-        fallback: An optional callable to invoke when retries are exhausted.
+        config: Retry configuration parameters
     """
 
-    def __init__(
-        self,
-        *,
-        max_retries: int = 3,
-        base_delay: float = 1.0,
-        fallback: Callable[..., Any] | None = None,
-    ) -> None:
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-        self.fallback = fallback
-
-    def wrap(self, fn: F) -> F:
-        """Decorate ``fn`` with retry + fallback logic.
+    def __init__(self, config: RetryConfig) -> None:
+        """Initialize retry handler with configuration.
 
         Args:
-            fn: The callable to protect.
+            config: Retry configuration object
+        """
+        self.config = config
+
+    def retry(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        """Decorator to add retry logic to a function.
+
+        Args:
+            func: The function to decorate with retry logic
 
         Returns:
-            A wrapped callable with the same signature.
+            Decorated function with retry behavior
         """
-        retry_decorator = retry(
-            stop=stop_after_attempt(self.max_retries),
-            wait=wait_none() if self.base_delay == 0 else wait_exponential_jitter(initial=self.base_delay, max=60),
-            reraise=False,
-        )
+        return retry(
+            stop=stop_after_attempt(self.config.max_attempts),
+            wait=wait_exponential(multiplier=self.config.wait_multiplier, max=self.config.wait_max),
+            retry=retry_if_exception_type(Exception),
+            reraise=True
+        )(func)
         retried_fn = retry_decorator(fn)
 
         @functools.wraps(fn)

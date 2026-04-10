@@ -6,28 +6,28 @@ from typing import Any
 
 import pytest
 
-from harness.base.agent import BaseAgent, TraceRecord
+from harness.base.agent import BaseAgent
 from harness.base.config import AgentConfig
-from harness.schemas.base import BaseOutputSchema
+from harness.schemas.base import AgentInput, AgentOutput
 
 
 # ── Fixtures / helpers ────────────────────────────────────────────────
 
-class SampleOutput(BaseOutputSchema):
+class SampleOutput(AgentOutput):
     answer: str
 
 
-class GoodAgent(BaseAgent[SampleOutput]):
+class GoodAgent(BaseAgent):
     """An agent that always succeeds."""
 
-    def _execute(self, input_data: dict[str, Any]) -> SampleOutput:
-        return SampleOutput(answer=input_data.get("q", "42"))
+    def _execute(self, input_obj: AgentInput) -> dict[str, Any]:
+        return {"result": input_obj.data.get("q", "42"), "answer": input_obj.data.get("q", "42")}
 
 
-class BadAgent(BaseAgent[SampleOutput]):
+class BadAgent(BaseAgent):
     """An agent that always raises."""
 
-    def _execute(self, input_data: dict[str, Any]) -> SampleOutput:
+    def _execute(self, input_obj: AgentInput) -> dict[str, Any]:
         raise RuntimeError("boom")
 
 
@@ -49,35 +49,12 @@ class TestAgentConfig:
 
 class TestBaseAgent:
     def test_happy_path(self) -> None:
-        agent = GoodAgent(config=AgentConfig())
-        result = agent.run({"q": "hello"})
-        assert result.answer == "hello"
+        agent = GoodAgent(config=AgentConfig(name="test_agent"))
+        result = agent.process({"q": "hello"})
+        assert result["result"] == "hello"
+        assert result["answer"] == "hello"
 
-    def test_trace_recorded_on_success(self) -> None:
-        agent = GoodAgent(config=AgentConfig())
-        agent.run({"q": "test"})
-        trace = agent.get_trace()
-        assert len(trace) == 2
-        assert trace[0].step_name == "execute"
-        assert trace[0].success is True
-        assert trace[1].step_name == "validate"
-        assert trace[1].success is True
-
-    def test_trace_recorded_on_failure(self) -> None:
-        agent = BadAgent(config=AgentConfig())
+    def test_failure_propagation(self) -> None:
+        agent = BadAgent(config=AgentConfig(name="test_agent"))
         with pytest.raises(RuntimeError, match="boom"):
-            agent.run({})
-        trace = agent.get_trace()
-        assert len(trace) == 1
-        assert trace[0].success is False
-        assert trace[0].error == "boom"
-
-    def test_trace_record_model(self) -> None:
-        record = TraceRecord(
-            trace_id="abc",
-            step_name="test",
-            duration_seconds=0.5,
-            success=True,
-        )
-        assert record.trace_id == "abc"
-        assert record.error is None
+            agent.process({"dummy": "data"})

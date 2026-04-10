@@ -1,0 +1,32 @@
+{
+  "process_failure": [
+    {
+      "timestamp": "2026-04-10T20:22:13.495507",
+      "error_type": "TypeError",
+      "error_message": "'dict' object is not callable",
+      "error_module": "builtins",
+      "category": "process_failure"
+    },
+    {
+      "timestamp": "2026-04-10T20:22:49.068158",
+      "error_type": "RuntimeError",
+      "error_message": "boom",
+      "error_module": "builtins",
+      "category": "process_failure"
+    },
+    {
+      "timestamp": "2026-04-10T20:22:54.652469",
+      "error_type": "RuntimeError",
+      "error_message": "boom",
+      "error_module": "builtins",
+      "category": "process_failure"
+    },
+    {
+      "timestamp": "2026-04-10T20:23:00.992310",
+      "error_type": "RuntimeError",
+      "error_message": "boom",
+      "error_module": "builtins",
+      "category": "process_failure"
+    }
+  ]
+}

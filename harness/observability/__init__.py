@@ -6,6 +6,8 @@ Why this exists:
     component automatically emits JSON-friendly events with trace context.
 """
 
-from harness.observability.logging import get_logger, setup_logging
+from .logger import StructuredLogger
+
+__all__ = ["StructuredLogger"]
 
 __all__ = ["get_logger", "setup_logging"]

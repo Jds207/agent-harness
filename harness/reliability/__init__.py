@@ -7,7 +7,11 @@ Why this exists:
     gracefully, and surface permanent failures quickly.
 """
 
-from harness.reliability.circuit_breaker import CircuitBreaker
+from .retry import RetryWithFallback
+from .circuit_breaker import CircuitBreaker
+from .validator import StepValidator
+
+__all__ = ["RetryWithFallback", "CircuitBreaker", "StepValidator"]
 from harness.reliability.retry import RetryWithFallback
 from harness.reliability.validator import StepValidator
 

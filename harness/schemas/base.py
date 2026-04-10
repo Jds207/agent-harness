@@ -1,34 +1,38 @@
-"""BaseOutputSchema – the root model for all agent outputs.
+"""Base schemas for agent inputs and outputs.
 
 Why this exists:
-    Every agent output goes through Pydantic validation.  This base class
-    provides shared fields (trace_id, created_at) so downstream consumers
-    always have provenance metadata.
+    Agents must produce structured, validated input and output. These base schemas
+    ensure every input and output conforms to expected contracts, implementing
+    correctness by construction.
 """
 
-from __future__ import annotations
-
-from datetime import datetime, timezone
-from typing import Any
-
 from pydantic import BaseModel, Field
+from typing import Any, Dict
 
 
-class BaseOutputSchema(BaseModel):
-    """Root schema for agent outputs.
+class AgentInput(BaseModel):
+    """Base input schema for agents.
 
-    Why this exists:
-        Guarantees that every agent output carries a trace_id and timestamp,
-        making it trivially auditable.
+    Why this design: AgentInput provides a standardized, validated input structure that ensures all agent inputs conform to expected schemas, preventing runtime errors from malformed data.
 
     Attributes:
-        trace_id: Opaque identifier linking this output to its execution trace.
-        created_at: UTC timestamp of when the output was produced.
-        metadata: Arbitrary key-value pairs for domain-specific context.
+        data: Core input data payload
+        metadata: Additional context and metadata
     """
+    data: Dict[str, Any] = Field(default_factory=dict, description="Core input data payload")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional context and metadata")
 
-    trace_id: str = ""
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    metadata: dict[str, Any] = {}
 
-    model_config = {"extra": "forbid"}
+class AgentOutput(BaseModel):
+    """Base output schema for agents.
+
+    Why this design: AgentOutput ensures all agent outputs are properly structured and validated, maintaining consistency across different agent implementations and enabling reliable downstream processing.
+
+    Attributes:
+        result: The main output result
+        metadata: Additional context and metadata
+        success: Whether the operation succeeded
+    """
+    result: Any = Field(..., description="The main output result")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional context and metadata")
+    success: bool = Field(default=True, description="Whether the operation succeeded")

@@ -6,7 +6,9 @@ Why this exists:
     business-level invariants the caller defines.
 """
 
-from harness.schemas.base import BaseOutputSchema
-from harness.schemas.invariants import InvariantValidator
+from .base import AgentInput, AgentOutput
+from .validator import InvariantValidator
+
+__all__ = ["AgentInput", "AgentOutput", "InvariantValidator"]
 
 __all__ = ["BaseOutputSchema", "InvariantValidator"]

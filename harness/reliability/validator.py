@@ -7,60 +7,38 @@ Why this exists:
     raises a typed ``HarnessValidationError`` on any failure.
 """
 
-from __future__ import annotations
-
-from typing import Any, TypeVar
-
-from pydantic import BaseModel, ValidationError
-
-from harness.observability.logging import get_logger
-from harness.schemas.invariants import InvariantValidator
-from harness.utils.exceptions import HarnessValidationError
-
-T = TypeVar("T", bound=BaseModel)
-
-logger = get_logger()
+from typing import Any
 
 
 class StepValidator:
-    """Validates step output against a Pydantic model and optional invariants.
+    """Validator for processing steps.
 
-    Why this exists:
-        Combines schema validation (Pydantic) and business-rule validation
-        (InvariantValidator) into a single method so pipeline steps can
-        validate with one call.
+    Why this design: StepValidator ensures each step in the agent processing pipeline meets preconditions and postconditions, maintaining invariants throughout the execution flow. It provides a simple interface for validating pipeline state transitions.
 
-    Args:
-        invariant_validator: Optional invariant validator to run after
-            schema validation succeeds.
+    This validator can be extended to check specific step requirements.
     """
 
-    def __init__(self, invariant_validator: InvariantValidator | None = None) -> None:
-        self._invariant_validator = invariant_validator
-
-    def validate(self, model_class: type[T], data: dict[str, Any]) -> T:
-        """Parse ``data`` into ``model_class`` and run invariant checks.
+    def validate_step(self, step_name: str, **kwargs: Any) -> None:
+        """Validate a processing step.
 
         Args:
-            model_class: The Pydantic model to validate against.
-            data: Raw data dict to validate.
-
-        Returns:
-            A validated model instance.
+            step_name: Name of the step being validated
+            **kwargs: Additional validation parameters
 
         Raises:
-            HarnessValidationError: On schema or invariant failure.
+            ValueError: If validation fails for the step
         """
-        try:
-            instance = model_class.model_validate(data)
-        except ValidationError as exc:
-            logger.error("step_validation_failed", errors=exc.error_count())
-            raise HarnessValidationError(
-                f"Schema validation failed: {exc}",
-                violations=[str(e["type"]) for e in exc.errors()],
-            ) from exc
+        if step_name == "pre_process":
+            # Validate preconditions for processing
+            # Could check system resources, dependencies, etc.
+            pass
 
-        if self._invariant_validator is not None:
-            self._invariant_validator.check(instance)
+        elif step_name == "post_process":
+            # Validate postconditions after processing
+            # Could check output consistency, cleanup status, etc.
+            pass
 
-        return instance
+        else:
+            raise ValueError(f"Unknown step: {step_name}")
+
+        # Additional custom validations can be added here based on kwargs

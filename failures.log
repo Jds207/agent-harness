@@ -1,0 +1,4 @@
+{"timestamp": "2026-04-10T20:22:13.494223", "error_type": "TypeError", "error_message": "'dict' object is not callable", "error_module": "builtins", "context": "data={'q': 'hello'} metadata={}"}
+{"timestamp": "2026-04-10T20:22:49.065437", "error_type": "RuntimeError", "error_message": "boom", "error_module": "builtins", "context": "data={'dummy': 'data'} metadata={}"}
+{"timestamp": "2026-04-10T20:22:54.651511", "error_type": "RuntimeError", "error_message": "boom", "error_module": "builtins", "context": "data={'dummy': 'data'} metadata={}"}
+{"timestamp": "2026-04-10T20:23:00.991738", "error_type": "RuntimeError", "error_message": "boom", "error_module": "builtins", "context": "data={'dummy': 'data'} metadata={}"}

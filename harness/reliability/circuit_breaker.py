@@ -7,46 +7,63 @@ Why this exists:
     then periodically probes to see if the service has recovered.
 """
 
-from __future__ import annotations
-
+from typing import Any, Callable
 import time
-from collections.abc import Callable
-from typing import Any
-
-from harness.observability.logging import get_logger
-from harness.utils.exceptions import CircuitOpenError
-
-logger = get_logger()
 
 
 class CircuitBreaker:
-    """Simple circuit breaker with closed → open → half-open states.
+    """Circuit breaker pattern implementation.
 
-    Why this exists:
-        Prevents cascading failures by stopping calls to a downstream
-        service that is known to be unhealthy, and automatically
-        recovering once it begins responding again.
+    Why this design: CircuitBreaker prevents cascading failures by temporarily stopping calls to failing services, allowing them time to recover and maintaining system stability. It implements the classic closed/open/half-open state machine.
 
     Args:
-        name: A human-readable name for this circuit (used in logs/errors).
-        failure_threshold: Consecutive failures needed to open the circuit.
-        recovery_timeout: Seconds to wait before allowing a probe call.
+        failure_threshold: Number of consecutive failures before opening circuit
+        recovery_timeout: Seconds to wait before attempting recovery
     """
 
-    def __init__(
-        self,
-        name: str,
-        *,
-        failure_threshold: int = 5,
-        recovery_timeout: float = 30.0,
-    ) -> None:
-        self.name = name
+    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0) -> None:
+        """Initialize circuit breaker.
+
+        Args:
+            failure_threshold: Consecutive failures needed to open circuit
+            recovery_timeout: Time to wait before recovery attempt
+        """
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
+        self.failure_count = 0
+        self.last_failure_time = 0.0
+        self._state = "closed"  # closed, open, half-open
 
-        self._failure_count: int = 0
-        self._state: str = "closed"
-        self._last_failure_time: float = 0.0
+    def call(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        """Decorator to wrap function with circuit breaker logic.
+
+        Args:
+            func: Function to protect with circuit breaker
+
+        Returns:
+            Wrapped function
+        """
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            if self._state == "open":
+                if time.time() - self.last_failure_time > self.recovery_timeout:
+                    self._state = "half-open"
+                else:
+                    raise Exception("Circuit breaker is open")
+
+            try:
+                result = func(*args, **kwargs)
+                if self._state == "half-open":
+                    self._state = "closed"
+                    self.failure_count = 0
+                return result
+            except Exception as e:
+                self.failure_count += 1
+                self.last_failure_time = time.time()
+                if self.failure_count >= self.failure_threshold:
+                    self._state = "open"
+                raise e
+
+        return wrapper
 
     @property
     def state(self) -> str:
